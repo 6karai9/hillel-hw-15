@@ -1,30 +1,44 @@
-const checkBox = document.querySelector('#checkBox');
-function Tasks (_formInput, _todosWrapper, _todosDone) {
-    this.todosWrapper = document.querySelector(_todosWrapper);
-    this.todosDone = document.querySelector(_todosDone);
-    this.addItem = (event) => {
-        event.preventDefault();
-        this.input = event.target.querySelector(_formInput);
-        this.todosWrapper.insertAdjacentHTML("beforeend", this.createTemplate(this.input.value))
-    }
-    this.itemDone = (event) => {
-        this.unDoneItem = event.target.querySelector('.todo-item__description').checked;
-        this.todosDone.insertAdjacentHTML("beforeend", this.createTemplate(this.unDoneItem.value));
-    }
-    this.createTemplate = function (description) {
-    return  `
-            <div class="todo-item">
-                <input type="checkbox" name="checkbox" id="js--item__check">
-                <div class="todo-item__description">${description}</div>
-            </div>
-            `
+const form = document.querySelector('.js--form');
+const input = document.querySelector('.js--form__input');
+const todosWrapper = document.querySelector('.js--todos-wrapper');
+const todosWrapperDone = document.querySelector('.js--todos-wrapper-done');
+
+function addTask(event) {
+    event.preventDefault();
+    const taskDescription = input.value;
+    if (taskDescription) {
+        const taskElement = createTaskElement(taskDescription);
+        todosWrapper.appendChild(taskElement);
+        input.value = '';
     }
 }
 
-const task = new Tasks(
-    '.js--form__input',
-    '.js--todos-wrapper',
-    '.js--todos-wrapper-done'
-    );
+function createTaskElement(description) {
+    const taskElement = document.createElement('div');
+    taskElement.classList.add('todo-item');
 
-document.querySelector('.js--form').addEventListener('submit',task.addItem);
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.classList.add('js--item__check');
+    checkbox.addEventListener('change', moveTaskToDone);
+
+    const taskDescription = document.createElement('div');
+    taskDescription.classList.add('todo-item__description');
+    taskDescription.textContent = description;
+
+    taskElement.appendChild(checkbox);
+    taskElement.appendChild(taskDescription);
+
+    return taskElement;
+}
+
+function moveTaskToDone(event) {
+    const taskElement = event.target.closest('.todo-item');
+    if (taskElement) {
+        taskElement.classList.add('completed');
+        taskElement.removeChild(event.target);
+        todosWrapperDone.appendChild(taskElement);
+    }
+}
+
+form.addEventListener('submit', addTask);
